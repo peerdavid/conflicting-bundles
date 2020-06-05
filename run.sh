@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# See README.md to setup environment correctly
+source env/bin/activate
+
 python3 train.py --dataset="cifar" --num_layers="50" --log_dir="no_residuals/50" --use_residual="False"
 python3 train.py --dataset="cifar" --num_layers="76" --log_dir="no_residuals/76" --use_residual="False"
 python3 train.py --dataset="cifar" --num_layers="50" --log_dir="residuals/50" --use_residual="True"

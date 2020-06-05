@@ -16,9 +16,9 @@ def get_config():
     argparser.add_argument("--log_dir", default="tmp",  help="Log directory")   
     argparser.add_argument("--dataset", default="imagenette", help="imagenette, cifar, svhn or mnist")
     argparser.add_argument("--runs", default=3, type=int, help="Multiple executions to get mean and std. Ignored for auto-tune in order to get multiple architectures from different executions")
-    argparser.add_argument("--epochs", default=10, type=int, help="Number of epochs")
+    argparser.add_argument("--epochs", default=120, type=int, help="Number of epochs")
     argparser.add_argument("--batch_size", default=64, type=int, help="Batch size used for training")
-    argparser.add_argument("--learning_rate", default=1e-3, type=float, help="Learning rate for adam") #lr 64 = 1e-5, lr 32 = 1e-5, lr16 = 1e-2
+    argparser.add_argument("--learning_rate", default=1e-3, type=float, help="Learning rate for optimizer")
 
     # Model
     argparser.add_argument("--num_layers", default=50, type=int, help="Number of layers for ResNet. Ignored for auto-tune training.")
