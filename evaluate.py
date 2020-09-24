@@ -1,5 +1,5 @@
 #
-# Evaluate residual networks from the paper "Conflicting Clusters".
+# Evaluate residual networks from the paper "Conflicting bundles".
 #
 try:
     # If we are running in a multi node multi gpu setup. Otherwise run 
@@ -23,7 +23,7 @@ matplotlib.use('Agg')
 
 from models.factory import create_model
 from data.factory import load_dataset
-from conflicting_cluster import cluster_entropy
+from conflicting_bundle import bundle_entropy
 from config import get_config
 import shutil
 config = get_config()
@@ -72,16 +72,16 @@ def evaluate(train_ds, test_ds, writer, log_dir_run):
         is_last_epoch = epoch >= config.epochs-1
 
         # Measure conflicts 
-        conflicts = cluster_entropy(train_ds, model, config)
+        conflicts = bundle_entropy(train_ds, model, config)
         conflicts_int = conflicts_integral(conflicts_int, conflicts)
-        print("Num. cluster: %.0f; Cluster entropy: %.5f" % \
+        print("Num. bundle: %.0f; bundle entropy: %.5f" % \
                 (conflicts[-1][0], conflicts[-1][1]), flush=True)
 
         # Tensorboard shows entropy at step t and csv file the 
-        # normalized integral of the cluster entropy
+        # normalized integral of the bundle entropy
         with writer.as_default():
-            tf.summary.scalar("Cluster/Num", conflicts[-1][0], step=epoch)
-            tf.summary.scalar("Cluster/Entropy", conflicts[-1][1], step=epoch)
+            tf.summary.scalar("bundle/Num", conflicts[-1][0], step=epoch)
+            tf.summary.scalar("bundle/Entropy", conflicts[-1][1], step=epoch)
         writer.flush()
 
         # "The test accuracy is averaged over the last 5 epochs to exclude outliers."
@@ -154,7 +154,7 @@ def main():
     with open("%s/test.csv" % (config.log_dir), "w") as out:
         writer = csv.writer(out)
         writer.writerow([
-            "num_cluster", "cluster_entropy", "test_loss", "test_accuracy"
+            "num_bundle", "bundle_entropy", "test_loss", "test_accuracy"
         ])
         writer.writerows(test_csv)
     

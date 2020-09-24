@@ -24,7 +24,7 @@ import tensorflow_addons as tfa
 
 from models.factory import create_model
 from data.factory import load_dataset
-from conflicting_cluster import cluster_entropy
+from conflicting_bundle import bundle_entropy
 from config import get_config, save_config
 config = get_config()
 
@@ -33,22 +33,22 @@ config = get_config()
 config.runs = 1 
 
 def prune_model(model, train_ds):       
-    """ If the cluster entropy is larger than zero, the first conflicting layer 
+    """ If the bundle entropy is larger than zero, the first conflicting layer 
         and all subsequent layers of the same block type (a, b, c or d) are 
         removed from the architecture.
     """
     print("Start pruning of architecture...", flush=True)
     config.all_conflict_layers = True
-    conflicts = cluster_entropy(train_ds, model, config)
+    conflicts = bundle_entropy(train_ds, model, config)
 
     layer = 0
     for block_type in range(len(config.pruned_layers)):
         new_layers = 0
         for block_layer in range(config.pruned_layers[block_type]):
             layer += 1
-            cluster_entropy_of_layer = conflicts[layer][1]
+            bundle_entropy_of_layer = conflicts[layer][1]
 
-            if cluster_entropy_of_layer <= 0:
+            if bundle_entropy_of_layer <= 0:
                 new_layers += 1
                 continue
             
@@ -207,7 +207,7 @@ def train(train_ds, test_ds, train_writer, test_writer, log_dir_run):
                 # conflicts at a^{(L)} as its computationally cheaper to 
                 # evaluate only the last layer rather than all layers
                 config.all_conflict_layers = False
-                conflicts = cluster_entropy(train_ds, model, config)
+                conflicts = bundle_entropy(train_ds, model, config)
 
                 if conflicts[-1][1] > 0:
                     # Our model has conflicts, so lets autotune our model
@@ -278,7 +278,7 @@ def main():
     train_ds, test_ds = load_dataset(config, augment=True)
     
     # "[...] This process is repeated until no conflicting layer can be found and the
-    # network is successfully trained without conflicting clusters for 120 epochs."
+    # network is successfully trained without conflicting bundles for 120 epochs."
     trained = False
     while not trained:
         print("###################################################")

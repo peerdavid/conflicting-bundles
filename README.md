@@ -1,12 +1,12 @@
-# Conflicting Clusters
+# Conflicting bundles
 In the original source we used much more different architectures and models, 
-therefore we provide a re-implementation of "Conflicting Clusters" 
+therefore we provide a re-implementation of "Conflicting bundles" 
 here which keeps the code simple, understandable and as a starting point 
 for new research. We keep the multi GPU setup (single GPU also works) but 
 removed the multi node training for code simplicity.
 
-Note: The vectorized measurement of the cluster entropy is implemented 
-in ```conflicting_cluster.py```.
+Note: The vectorized measurement of the bundle entropy is implemented 
+in ```conflicting_bundle.py```.
 
 
 # Dependencies
@@ -25,7 +25,7 @@ automatically and can take a few minutes.
 
 # Training
 Note: A checkpoint is created after each epoch to be able to evaluate the model 
-and to evaluate the cluster entropy. To execute all experiments 
+and to evaluate the bundle entropy. To execute all experiments 
 about 900GB of storage are needed. You can see an example how to train and 
 evaluate models below or you can also execute the run.sh script.
 
@@ -67,7 +67,7 @@ python3 auto_tune.py --dataset="cifar" --log_dir="auto_tune/2"
 To evaluate a model trained with fixed architecture setups or for a model 
 pruned with auto-tune, the ```evaluate.py``` script can be used. Results are 
 written into a csv files to e.g. create graphs automatically or also 
-tensorboard can be used to show all results (gradients, cluster entropy etc.).
+tensorboard can be used to show all results (gradients, bundle entropy etc.).
 
 ```bash
 python3 evaluate.py --dataset="cifar" --log_dir="no_residuals/50" 

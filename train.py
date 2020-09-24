@@ -1,5 +1,5 @@
 #
-# Train residual networks from the paper "Conflicting Clusters". Can then be 
+# Train residual networks from the paper "Conflicting bundles". Can then be 
 # evaluated using "evaluate.py". 
 #
 

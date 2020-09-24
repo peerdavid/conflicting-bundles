@@ -10,7 +10,7 @@ import pickle
 # Hyperparameters and cmd args
 #
 def get_config():
-    argparser = argparse.ArgumentParser(description="Conflicting Clusters")
+    argparser = argparse.ArgumentParser(description="Conflicting bundles")
 
     # Training
     argparser.add_argument("--log_dir", default="tmp",  help="Log directory")   
