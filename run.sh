@@ -9,14 +9,11 @@ source env/bin/activate
 #
 # Experiments FNN
 #
-#python3 train.py --dataset="mnist" --num_layers="5" --width_layers="50" --log_dir="fnn/50/5" --model="fnn" --epochs=10
-python3 train.py --dataset="mnist" --num_layers="25" --width_layers="50" --log_dir="fnn/50/25" --model="fnn" --epochs=50
-#python3 train.py --dataset="mnist" --num_layers="50" --width_layers="50" --log_dir="fnn/50/50" --model="fnn" --epochs=50
-
-#...
-#python3 evaluate.py --dataset="mnist" --log_dir="fnn/50/5"
-python3 evaluate.py --dataset="mnist" --log_dir="fnn/50/25"
-#python3 evaluate.py --dataset="mnist" --log_dir="fnn/50/50"
+python3 train.py --dataset="mnist" --num_layers="50" --width_layers="10" --log_dir="fnn/10/50" --model="fnn" --epochs=5
+#python3 train.py --dataset="mnist" --num_layers="50" --width_layers="25" --log_dir="fnn/25/50" --model="fnn" --epochs=5
+# ...
+python3 evaluate.py --dataset="mnist" --log_dir="fnn/10/50"
+#python3 evaluate.py --dataset="mnist" --log_dir="fnn/25/50"
 
 
 # #

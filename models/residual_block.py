@@ -10,13 +10,13 @@ class BasicBlock(tf.keras.layers.Layer):
         self.conv1 = tf.keras.layers.Conv2D(filters=filter_num,
                                             kernel_size=(3, 3),
                                             strides=stride,
-                                            kernel_initializer="he_normal",
+                                            kernel_initializer="he_uniform",
                                             padding="same")
         self.bn1 = tf.keras.layers.BatchNormalization()
         self.conv2 = tf.keras.layers.Conv2D(filters=filter_num,
                                             kernel_size=(3, 3),
                                             strides=1,
-                                            kernel_initializer="he_normal",
+                                            kernel_initializer="he_uniform",
                                             padding="same")
         self.bn2 = tf.keras.layers.BatchNormalization()
 
@@ -25,7 +25,7 @@ class BasicBlock(tf.keras.layers.Layer):
                 self.downsample = tf.keras.Sequential()
                 self.downsample.add(tf.keras.layers.Conv2D(filters=filter_num,
                                                         kernel_size=(1, 1),
-                                                        kernel_initializer="he_normal",
+                                                        kernel_initializer="he_uniform",
                                                         strides=stride))
                 self.downsample.add(tf.keras.layers.BatchNormalization())
             else:

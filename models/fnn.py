@@ -18,7 +18,7 @@ class FNN(tf.keras.Model):
                 layers.Dense(config.width_layers, 
                 name="fc%d" % l, 
                 activation="relu",
-                kernel_initializer="he_normal",
+                kernel_initializer="he_uniform",
                 bias_initializer=tf.zeros_initializer)
             )
 
@@ -47,11 +47,7 @@ class FNN(tf.keras.Model):
 
     def max_weights(self):
         ret = []
-
-        l=0
         for weights in self.fc_layers.trainable_weights:
             w = tf.reduce_max(tf.abs(weights))
             ret.append(w)
-            l+=1
-
         return tf.reduce_max(ret)

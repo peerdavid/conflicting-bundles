@@ -51,9 +51,11 @@ def bundle_entropy(train_ds, model, config):
     # is O(L * |X|)
     res = []
     max_weights = model.max_weights()
+    max_weights = tf.cast(max_weights, tf.float32)
     A = zip(*A)
     iterator = tqdm(A) if config.all_conflict_layers else A
     for a in iterator:
+        a = tf.cast(tf.concat(a, axis=0), tf.float32)
         a = tf.concat(a, axis=0)
 
         # As written in the paper we not directly compare a_i and a_j in order 

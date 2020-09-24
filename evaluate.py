@@ -74,7 +74,7 @@ def evaluate(train_ds, test_ds, writer, log_dir_run):
         # Measure conflicts 
         conflicts = bundle_entropy(train_ds, model, config)
         conflicts_int = conflicts_integral(conflicts_int, conflicts)
-        print("Num. bundle: %.0f; bundle entropy: %.5f" % \
+        print("Num. bundles: %.0f; Bundle entropy: %.5f" % \
                 (conflicts[-1][0], conflicts[-1][1]), flush=True)
 
         # Tensorboard shows entropy at step t and csv file the 
