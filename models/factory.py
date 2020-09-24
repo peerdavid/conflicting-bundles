@@ -1,6 +1,7 @@
 
 import tensorflow as tf
 from models.resnet import ResNet
+from models.fnn import FNN
 
 
 def create_model(config):
@@ -9,7 +10,16 @@ def create_model(config):
         return ResNet(config.pruned_layers, config)
     
     # Create from fixed architecture
-    elif config.num_layers == 4:
+    if config.model == "vgg" or config.model == "resnet":
+        return create_resnet_vggnet(config)
+    elif config.model == "fnn":
+        return FNN(config)
+
+    raise Exception("Unknown model " + str(config.model))
+
+
+def create_resnet_vggnet(config):
+    if config.num_layers == 4:
         return ResNet([1, 0, 0, 0], config)
     elif config.num_layers == 10:
         return ResNet([1, 1, 1, 1], config)

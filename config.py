@@ -21,8 +21,9 @@ def get_config():
     argparser.add_argument("--learning_rate", default=1e-3, type=float, help="Learning rate for optimizer")
 
     # Model
-    argparser.add_argument("--num_layers", default=50, type=int, help="Number of layers for ResNet. Ignored for auto-tune training.")
-    argparser.add_argument("--use_residual", default="False", help="Should a residual connection be used? Ignored for auto-tune training.")
+    argparser.add_argument("--model", default="vgg", help="fnn, vgg or resnet")
+    argparser.add_argument("--num_layers", default=50, type=int, help="Number of layers. Ignored for auto-tune training.")
+    argparser.add_argument("--width_layers", default=50, type=int, help="Number of neurons per layer for FNN. Ignored for vgg and resnet")
 
     # Evaluation
     argparser.add_argument("--last_epoch_only", default="False", help="Evaluate only last epoch.")
@@ -44,8 +45,8 @@ def get_config():
         file_config.all_conflict_layers = _str_to_bool(config.all_conflict_layers)
         return file_config
 
+    config.use_residual = (config.model == "resnet")
     config.num_gpus = len(tf.config.experimental.list_physical_devices('GPU'))
-    config.use_residual = _str_to_bool(config.use_residual)
     config.last_epoch_only = _str_to_bool(config.last_epoch_only)
     config.all_conflict_layers = _str_to_bool(config.all_conflict_layers)
     config.conflicting_samples_size = int(config.conflicting_samples_size)
