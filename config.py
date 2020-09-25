@@ -43,15 +43,17 @@ def get_config():
     file_config = _load_config_from_file(config)
     if file_config != None:
         file_config.all_conflict_layers = _str_to_bool(config.all_conflict_layers)
+        file_config.num_gpus = len(tf.config.experimental.list_physical_devices('GPU'))
         return file_config
 
     config.use_residual = (config.model == "resnet")
-    config.num_gpus = len(tf.config.experimental.list_physical_devices('GPU'))
     config.last_epoch_only = _str_to_bool(config.last_epoch_only)
     config.all_conflict_layers = _str_to_bool(config.all_conflict_layers)
     config.conflicting_samples_size = int(config.conflicting_samples_size)
     config.log_dir = log_dir
     save_config(config)
+
+    config.num_gpus = len(tf.config.experimental.list_physical_devices('GPU'))
 
     return config
 

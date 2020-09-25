@@ -24,7 +24,9 @@ automatically and can take a few minutes.
 
 
 # Execute 
-We provide a ```run.sh``` file to show how all models can be trained and evaluated.
+We provide a ```run.sh``` file to show how all experiments can be trained and evaluated.
+Note that it is important to train the model to check reproducibility 
+and therefore, no checkpoints are provided.
 
 ## Training
 Models are either trained on a single or on multiple gpu's. 
@@ -32,7 +34,6 @@ A checkpoint is created after each epoch to be able to evaluate the test-accurac
 and to evaluate the bundle entropy. Therefore, 
 about 2TB of storage are needed. Details of all parameters that are available 
 can be found in ```config.py```.
-
 
 ## Evaluation
 To evaluate a model trained with fixed architecture setups or for a model 
