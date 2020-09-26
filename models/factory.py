@@ -1,39 +1,45 @@
 
 import tensorflow as tf
-from models.resnet import ResNet
+from models.vggnet import VGGNet
 from models.fnn import FNN
+from models.vgg_block import make_basic_block_layer as make_vgg_block
+from models.residual_block import make_basic_block_layer as make_residual_block
 
 
 def create_model(config):
-    # Create model from auto-tune
-    if hasattr(config, "pruned_layers"):
-        return ResNet(config.pruned_layers, config)
-    
     # Create from fixed architecture
-    if config.model == "vgg" or config.model == "resnet":
-        return create_resnet_vggnet(config)
+    if config.model == "vgg":
+        blocks = get_blocks(config)
+        return VGGNet(blocks, config, block_fn=make_vgg_block)
+    elif config.model == "resnet":
+        blocks = get_blocks(config)
+        return VGGNet(blocks, config, block_fn=make_residual_block)
     elif config.model == "fnn":
         return FNN(config)
 
     raise Exception("Unknown model " + str(config.model))
 
 
-def create_resnet_vggnet(config):
+def get_blocks(config):
+    # If we get pruned layers from auto_tune, use those...
+    if hasattr(config, "pruned_layers"):
+        return config.pruned_layers
+
     if config.num_layers == 4:
-        return ResNet([1, 0, 0, 0], config)
+        return [1, 0, 0, 0]
     elif config.num_layers == 10:
-        return ResNet([1, 1, 1, 1], config)
+        return [1, 1, 1, 1]
     elif config.num_layers == 20:
-        return ResNet([2, 2, 3, 2], config)
+        return [2, 2, 3, 2]
     elif config.num_layers == 30:
-        return ResNet([3, 3, 5, 3], config)
+        return [3, 3, 5, 3]
     elif config.num_layers == 50:
-        return ResNet([3, 6, 12, 3], config)
+        return [3, 6, 12, 3]
     elif config.num_layers == 76:
-        return ResNet([3, 6, 25, 3], config)
+        return [3, 6, 25, 3]
     elif config.num_layers == 100:
-        return ResNet([3, 12, 31, 3], config)
+        return [3, 12, 31, 3]
     elif config.num_layers == 120:
-        return ResNet([3, 12, 41, 3], config)
-    
-    raise Exception("Unknown resnet " + str(config.num_layers))
+        return [3, 12, 41, 3]
+
+    raise Exception("Unknown size " + str(config.num_layers))    

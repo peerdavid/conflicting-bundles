@@ -20,28 +20,12 @@ class BasicBlock(tf.keras.layers.Layer):
                                             padding="same")
         self.bn2 = tf.keras.layers.BatchNormalization()
 
-        if stride != 1:
-            self.downsample = tf.keras.Sequential()
-            self.downsample.add(tf.keras.layers.Conv2D(filters=filter_num,
-                                                    kernel_size=(1, 1),
-                                                    kernel_initializer="he_normal",
-                                                    strides=stride))
-            self.downsample.add(tf.keras.layers.BatchNormalization())
-        else:
-            self.downsample = lambda x: x
-            # Here also other bijective functions can be used. We tested with
-            # self.downsample = lambda x: 2*x+0.1  
-    
     def call(self, inputs, training):
         x = self.conv1(inputs)
         x = self.bn1(x, training=training)
         x = tf.nn.relu(x)
         x = self.conv2(x)
         x = self.bn2(x, training=training)
-
-        residual = self.downsample(inputs)
-        x = tf.keras.layers.add([residual, x])
-        
         output = tf.nn.relu(x)
         return output
 

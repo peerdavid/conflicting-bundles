@@ -207,7 +207,9 @@ def train(train_ds, test_ds, train_writer, test_writer, log_dir_run):
                 # conflicts at a^{(L)} as its computationally cheaper to 
                 # evaluate only the last layer rather than all layers
                 config.all_conflict_layers = False
+                print("Checking conflicts...")
                 conflicts = bundle_entropy(train_ds, model, config)
+                print("Entropy: %.5f" % conflicts[-1][1])
 
                 if conflicts[-1][1] > 0:
                     # Our model has conflicts, so lets autotune our model
@@ -262,6 +264,7 @@ def main():
 
     # "First, the largest network from fig. 1 (120 layer) is trained without 
     # residual connections."
+    config.model = "vgg"
     config.pruned_layers = [3,12,41,3]
     config.use_residual = False
     config.conflicting_samples_size = 512 
