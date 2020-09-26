@@ -64,7 +64,7 @@ def bundle_entropy(train_ds, model, config):
         # check after subtracting the values from the maximum weights which 
         # is equivalent. Note that this is not possible if gamma should be 
         # larger than the floating point resolution.
-        equality_check = max_weights - config.learning_rate * a * 1 / config.batch_size
+        equality_check = max_weights - config.learning_rate * a * 1.0 / float(config.batch_size)
         equality_check = tf.reshape(equality_check, [tf.shape(equality_check)[0], -1])
         num_bundle, bundle_entropy = get_bundle_and_conflicts(equality_check, Y, config)
         res.append([num_bundle, bundle_entropy])
