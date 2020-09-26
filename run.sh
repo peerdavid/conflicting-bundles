@@ -26,14 +26,14 @@ python3 evaluate.py --dataset="cifar" --log_dir="vgg/50"
 python3 evaluate.py --dataset="cifar" --log_dir="vgg/76" 
 
 
-# #
-# # Experiments ResNet
-# #
-# python3 train.py --dataset="cifar" --num_layers="50" --log_dir="resnet/50" --model="resnet"
-# python3 train.py --dataset="cifar" --num_layers="76" --log_dir="resnet/76" --model="resnet"
-# # ...
-# python3 evaluate.py --dataset="cifar" --log_dir="resnet/50" 
-# python3 evaluate.py --dataset="cifar" --log_dir="resnet/76" 
+#
+# Experiments ResNet
+#
+python3 train.py --dataset="cifar" --num_layers="50" --log_dir="resnet/50" --model="resnet"
+python3 train.py --dataset="cifar" --num_layers="76" --log_dir="resnet/76" --model="resnet"
+# ...
+python3 evaluate.py --dataset="cifar" --log_dir="resnet/50" 
+python3 evaluate.py --dataset="cifar" --log_dir="resnet/76" 
 
 
 #
