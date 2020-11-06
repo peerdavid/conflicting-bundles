@@ -5,9 +5,14 @@ here which keeps the code simple, understandable and as a starting point
 for new research. We keep the multi GPU setup (single GPU also works) but 
 removed the multi node training for code simplicity.
 
-Note: The vectorized measurement of the bundle entropy is implemented 
-in ```conflicting_bundle.py```.
-
+    @misc{peer2020conflicting,
+          title={Conflicting Bundles: Adapting Architectures Towards the Improved Training of Deep Neural Networks}, 
+          author={David Peer and Sebastian Stabinger and Antonio Rodriguez-Sanchez},
+          year={2020},
+          eprint={2011.02956},
+          archivePrefix={arXiv},
+          primaryClass={cs.LG}
+    }
 
 # Dependencies
 For this installation we assume that python3, pip3 and all nvidia drivers
