@@ -1,9 +1,5 @@
 # Conflicting bundles
-In the original source we used much more different architectures and models, 
-therefore we provide a re-implementation of "Conflicting bundles" 
-here which keeps the code simple, understandable and as a starting point 
-for new research. We keep the multi GPU setup (single GPU also works) but 
-removed the multi node training for code simplicity.
+This is the original implementation of the conflicting bundles [paper](https://arxiv.org/abs/2011.02956).
 
     @misc{peer2020conflicting,
           title={Conflicting Bundles: Adapting Architectures Towards the Improved Training of Deep Neural Networks}, 
