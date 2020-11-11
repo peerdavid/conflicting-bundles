@@ -50,8 +50,8 @@ def bundle_entropy(train_ds, model, config):
     # layers are needed. Therefore if all layers are evaluated the complexity
     # is O(L * |X|)
     res = []
-    max_weights = model.max_weights()
-    max_weights = tf.cast(max_weights, tf.float32)
+    weights_amplitude = model.weights_amplitude()
+    weights_amplitude = tf.cast(weights_amplitude, tf.float32)
     A = zip(*A)
     iterator = tqdm(A) if config.all_conflict_layers else A
     for a in iterator:
@@ -64,7 +64,7 @@ def bundle_entropy(train_ds, model, config):
         # check after subtracting the values from the maximum weights which 
         # is equivalent. Note that this is not possible if gamma should be 
         # larger than the floating point resolution.
-        equality_check = max_weights - config.learning_rate * a * 1.0 / float(config.batch_size)
+        equality_check = weights_amplitude - config.learning_rate * a * 1.0 / float(config.batch_size)
         equality_check = tf.reshape(equality_check, [tf.shape(equality_check)[0], -1])
         num_bundle, bundle_entropy = get_bundle_and_conflicts(equality_check, Y, config)
         res.append([num_bundle, bundle_entropy])

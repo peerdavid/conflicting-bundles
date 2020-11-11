@@ -45,7 +45,7 @@ class FNN(tf.keras.Model):
         return outputs
 
 
-    def max_weights(self):
+    def weights_amplitude(self):
         ret = []
         for weights in self.fc_layers.trainable_weights:
             w = tf.reduce_max(tf.abs(weights))

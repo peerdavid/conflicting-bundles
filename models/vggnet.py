@@ -67,7 +67,7 @@ class VGGNet(tf.keras.Model):
         return outputs
     
 
-    def max_weights(self):
+    def weights_amplitude(self):
         ret = []
 
         for weights in self.conv1.trainable_weights:
