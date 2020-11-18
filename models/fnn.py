@@ -8,7 +8,7 @@ class FNN(tf.keras.Model):
     
     def __init__(self, config):
         super(FNN, self).__init__()
-
+        self.cb = None
         self.fc_layers = []
         self.config = config
         self.image_dim = self.config.img_width * self.config.img_height * self.config.img_depth
@@ -28,7 +28,7 @@ class FNN(tf.keras.Model):
 
 
     def call(self, x, training=True):
-        outputs = []
+        self.cb = []
         batch_size = tf.shape(x)[0]
 
         # Reshape input images
@@ -37,17 +37,8 @@ class FNN(tf.keras.Model):
         # FC hidden layer
         for l in range(len(self.fc_layers)):
             x = self.fc_layers[l](x)
-            outputs.append(x)
+            self.cb.append(x)
 
         # Output layer
-        linear = self.out(x)
-        outputs.append(linear)
-        return outputs
-
-
-    def weights_amplitude(self):
-        ret = []
-        for weights in self.fc_layers.trainable_weights:
-            w = tf.reduce_max(tf.abs(weights))
-            ret.append(w)
-        return tf.reduce_max(ret)
+        x = self.out(x)
+        return x

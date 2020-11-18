@@ -13,8 +13,8 @@ def get_config():
     argparser = argparse.ArgumentParser(description="Conflicting bundles")
 
     # Training
-    argparser.add_argument("--log_dir", default="tmp",  help="Log directory")   
-    argparser.add_argument("--dataset", default="imagenette", help="imagenette, cifar, svhn or mnist")
+    argparser.add_argument("--log_dir", default="auto-tune",  help="Log directory")   
+    argparser.add_argument("--dataset", default="cifar", help="imagenette, cifar, svhn or mnist")
     argparser.add_argument("--runs", default=1, type=int, help="Multiple executions to get mean and std. Ignored for auto-tune in order to get multiple architectures from different executions")
     argparser.add_argument("--epochs", default=120, type=int, help="Number of epochs")
     argparser.add_argument("--batch_size", default=64, type=int, help="Batch size used for training")
@@ -26,8 +26,8 @@ def get_config():
     argparser.add_argument("--width_layers", default=50, type=int, help="Number of neurons per layer for FNN. Ignored for vgg and resnet")
 
     # Evaluation
-    argparser.add_argument("--last_epoch_only", default="False", help="Evaluate only last epoch.")
-    argparser.add_argument("--conflicting_samples_size", default=2048, help="How many samples are used for conflict test. Ignored for auto-tune training.")
+    #     argparser.add_argument("--last_epoch_only", default="False", help="Evaluate only last epoch.")
+    argparser.add_argument("--conflicting_samples_size", default=512, help="How many samples are used for conflict test. Ignored for auto-tune training.")
     argparser.add_argument("--all_conflict_layers", default="False", help="Evaluate conflicts of each layer. Ignored for auto-tune training.")
 
     # Update params
@@ -44,6 +44,7 @@ def get_config():
     if file_config != None:
         file_config.all_conflict_layers = _str_to_bool(config.all_conflict_layers)
         file_config.num_gpus = len(tf.config.experimental.list_physical_devices('GPU'))
+        file_config.conflicting_samples_size = config.conflicting_samples_size
         return file_config
 
     config.use_residual = (config.model == "resnet")

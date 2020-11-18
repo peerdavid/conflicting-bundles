@@ -6,7 +6,6 @@ class VGGNet(tf.keras.Model):
     def __init__(self, layer_params, config, block_fn):
         super(VGGNet, self).__init__()
         self.config = config
-
         self.conv1 = tf.keras.layers.Conv2D(filters=64,
                                             kernel_size=(7, 7),
                                             strides=2,
@@ -47,7 +46,7 @@ class VGGNet(tf.keras.Model):
 
 
     def call(self, inputs, training):
-        outputs = []
+        self.cb = []
         x = self.conv1(inputs)
         x = self.bn1(x, training=training)
         x = tf.nn.relu(x)
@@ -55,28 +54,11 @@ class VGGNet(tf.keras.Model):
 
         for block in self.blocks:
             x = block(x, training=training)
-            outputs.append(x)
+            self.cb.append((x, block))
         
         x = self.pool2(x)
         x = tf.reshape(x, [tf.shape(x)[0], -1])
-        outputs.append(x)
+        self.cb.append((x, self.pool2))
 
         x = self.fc(x)
-        outputs.append(x)
-
-        return outputs
-    
-
-    def weights_amplitude(self):
-        ret = []
-
-        for weights in self.conv1.trainable_weights:
-            ret.append(tf.reduce_max(tf.abs(weights)))
-        
-        for block in self.blocks:
-            for weights in block.trainable_weights:
-                ret.append(tf.reduce_max(tf.abs(weights)))
-
-        for weights in self.fc.trainable_weights:
-                ret.append(tf.reduce_max(tf.abs(weights)))
-        return tf.reduce_max(ret)
+        return x
