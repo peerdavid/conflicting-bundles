@@ -10,6 +10,7 @@ cb = cb.bundle_entropy(model, ds, train_batch_size=64, train_learning_rate=1e-3,
 import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
+import math
 
 
 def bundle_entropy(model, train_ds, train_batch_size, train_lr, 
@@ -30,7 +31,6 @@ def bundle_entropy(model, train_ds, train_batch_size, train_lr,
         param: num_classes - Number of classes needed to calculate the bundle entropy
         param: train_batch_size - The batch size that was used for training. See https://arxiv.org/abs/2011.02956
         param: train_lr - The batch size that was used for training. See https://arxiv.org/abs/2011.02956
-
         param: evaluation_size - Subset size of train_ds to use for bundle calculation
         param: all_layers - False to evaluate only a^L, otherwise a^1 to a^L are evaluated
         
@@ -75,10 +75,16 @@ def bundle_entropy(model, train_ds, train_batch_size, train_lr,
         # is equivalent. Note that this is not possible if gamma should be 
         # larger than the floating point resolution.
         weights_amplitude = _get_weight_amplitude(layers[i])
-        equality_check = weights_amplitude - a * train_lr / train_batch_size
+
+        # If layers use a scale e.g. to include BN etc. we also have to 
+        # sacle the a values accordingly
+        scale = layers[i].scale if hasattr(layers[i], "scale") else 1.0
+
+        equality_check = weights_amplitude - a * train_lr * (1.0 / train_batch_size) * scale
         equality_check = tf.reshape(equality_check, [tf.shape(equality_check)[0], -1])
         num_bundle, bundle_entropy = _calculate_bundles(equality_check, Y, num_classes)
         res.append([num_bundle, bundle_entropy])
+        #print("%d, %d, %d, %.5f" % (int(i/2), i%2, num_bundle, bundle_entropy), flush=True)
 
     return res
 
@@ -88,15 +94,14 @@ def _get_weight_amplitude(layer):
         amplitude of a layer. A layer could consist of multiple 
         sub layers (e.g. a vgg block with multiple layers).
         Therefore, we take the mean amplitude of each weight in 
-        trainable_weights. Splitting this up gives further detailed 
-        information for the cost of computational power.
+        trainable_weights.
 
         param: layer - Layer for which the amplitude should be known
         return: Single floating point value of the max. weight amplitude of some sub layers
     """
     ret = []
     for weights in layer.trainable_weights:
-        ret.append(tf.reduce_mean(tf.abs(weights)))
+        ret.append(tf.reduce_max(tf.abs(weights)))
     return tf.reduce_max(ret)
 
 
@@ -147,8 +152,7 @@ def _calculate_single_bundle(i, bundle, X, Y, bundle_entropy, num_classes):
     # And bundle all components
     bundle += same_bundle * next_bundle_id * zero_out
 
-    # Calculate the bundle entropy for the current bundle (same_bundle) using 
-    # the entropy
+    # Calculate the bundle entropy for the current bundle (same_bundle) using the entropy
     bundle_only = tf.cast(tf.boolean_mask(Y, same_bundle), tf.int32)
     bundle_class_prob = tf.math.bincount(bundle_only, minlength=num_classes, maxlength=num_classes, dtype=tf.float32)
     bundle_class_prob /= tf.reduce_sum(bundle_class_prob)

@@ -1,17 +1,18 @@
 import numpy as np
 import tensorflow as tf
-
+import random
 
 class VGGNet(tf.keras.Model):
-    def __init__(self, layer_params, config, block_fn):
+    def __init__(self, layer_params, config, block_fn, lesion=None):
         super(VGGNet, self).__init__()
         self.config = config
+        self.scale=1.0
         self.conv1 = tf.keras.layers.Conv2D(filters=64,
                                             kernel_size=(7, 7),
                                             strides=2,
                                             padding="same")
         self.bn1 = tf.keras.layers.BatchNormalization()
-
+        self.use_residual = []
 
         # "The MaxPool2D 3x3 operator is not added
         # for small datasets such as cifar where each image has only 32 × 32px"
@@ -38,6 +39,14 @@ class VGGNet(tf.keras.Model):
                                 blocks=layer_params[3],
                                 config=config,
                                 stride=2))
+        
+        #nop = random.randint(0, len(self.blocks))
+        #lesion_pos = random.sample(range(0, len(self.blocks)), lesion)
+        if lesion is not None:
+            for i in range(len(self.blocks)):
+                self.use_residual.append(not i in lesion)
+        
+        #print(self.use_residual, flush=True)
 
         self.pool2 = tf.keras.layers.GlobalAveragePooling2D()
         self.fc = tf.keras.layers.Dense(
@@ -52,9 +61,12 @@ class VGGNet(tf.keras.Model):
         x = tf.nn.relu(x)
         x = self.pool1(x)
 
-        for block in self.blocks:
-            x = block(x, training=training)
-            self.cb.append((x, block))
+        for i, block in enumerate(self.blocks):
+            use_residual = True if len(self.use_residual) == 0 else self.use_residual[i]
+            x = block(x, training=training, use_residual=use_residual)
+            
+            for c in block.cb:
+                self.cb.append((c, block))
         
         x = self.pool2(x)
         x = tf.reshape(x, [tf.shape(x)[0], -1])

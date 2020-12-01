@@ -20,13 +20,22 @@ class BasicBlock(tf.keras.layers.Layer):
                                             padding="same")
         self.bn2 = tf.keras.layers.BatchNormalization()
 
-    def call(self, inputs, training):
+
+    def call(self, inputs, training, use_residual=True):
         x = self.conv1(inputs)
+        scale_bn1 = tf.reduce_mean(x) / tf.math.sqrt(tf.math.reduce_variance(x)+1e-6)
+
         x = self.bn1(x, training=training)
         x = tf.nn.relu(x)
         x = self.conv2(x)
+
+        scale_bn2 = 1.0 / tf.math.sqrt(tf.math.reduce_variance(x)+1e-6)
+        self.scale = scale_bn2 * scale_bn1
+
         x = self.bn2(x, training=training)
         output = tf.nn.relu(x)
+
+        self.cb = [output]
         return output
 
 

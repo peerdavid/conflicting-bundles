@@ -43,8 +43,8 @@ def prune_model(model, train_ds):
             config.batch_size, config.learning_rate,
             config.num_classes, config.conflicting_samples_size, 
             all_layers=True)
-
-    layer = 0
+    
+    layer = -1
     for block_type in range(len(config.pruned_layers)):
         new_layers = 0
         for block_layer in range(config.pruned_layers[block_type]):
@@ -53,11 +53,11 @@ def prune_model(model, train_ds):
 
             if bundle_entropy_of_layer <= 0:
                 new_layers += 1
-                continue
+                #continue
             
-            config.pruned_layers[block_type] = new_layers
-            save_config(config)
-            return
+        config.pruned_layers[block_type] = new_layers
+    save_config(config)
+            #return
             
 
 def train(train_ds, test_ds, train_writer, test_writer, log_dir_run):
@@ -150,8 +150,10 @@ def train(train_ds, test_ds, train_writer, test_writer, log_dir_run):
             print("", flush=True)
             model.save_weights("%s/ckpt-%d" % (log_dir_run, epoch))
 
+            #
+            # Test
+            #
             if epoch % 5 == 0 or is_last_epoch:
-                # Test
                 for x, y in test_ds:
                     start = time.time()
                     distributed_test_step(x, y)
@@ -159,24 +161,13 @@ def train(train_ds, test_ds, train_writer, test_writer, log_dir_run):
                 with test_writer.as_default(): 
                     log_tensorboard("TEST", start, test_accuracy, 
                         epoch, test_loss, model, x)
-                    reset_test_metrics() 
-
-            # Train, but not the very last epoch as its not used...
-            if not is_last_epoch:
-                for x, y in train_ds:
-                    start = time.time()
-                    distributed_train_step(x, y)
-
-                with train_writer.as_default(): 
-                    log_tensorboard("TRAIN", start, train_accuracy, epoch,
-                        train_loss, model, x)
-                    reset_train_metrics()
-                train_writer.flush()    
+                    reset_test_metrics()   
 
             # In the previous experiments we have seen that 
-            # if there are no conflicts in the first epochs they will 
-            # no more occur. To speed up the training we only update the 
-            # architecture if we have conflicts in the first epochs
+            # conflicts occur after the third epoch. If we already 
+            # trained the network for 10 epochs without any conflicts, 
+            # we continue without checking conflicts because we have seen 
+            # in the experiments that after 10 epoch conflicts rarly occur.
             if epoch < 10:
                 # We evaluate the conflicting layer only if we have 
                 # conflicts at a^{(L)} as its computationally cheaper to 
@@ -196,6 +187,21 @@ def train(train_ds, test_ds, train_writer, test_writer, log_dir_run):
                     print("Found conflicting layers.", flush=True)
                     prune_model(model, train_ds)
                     return False
+
+            #
+            # Train
+            #
+            if not is_last_epoch:
+                for x, y in train_ds:
+                    start = time.time()
+                    distributed_train_step(x, y)
+
+                with train_writer.as_default(): 
+                    log_tensorboard("TRAIN", start, train_accuracy, epoch,
+                        train_loss, model, x)
+                    reset_train_metrics()
+                train_writer.flush()  
+            
             epoch += 1
 
         return True
@@ -236,7 +242,7 @@ def main():
     config.model = "vgg"
     config.pruned_layers = [3,12,41,3]
     config.use_residual = False
-    config.conflicting_samples_size = 512 
+    config.conflicting_samples_size = 64 
     log_dir_run = "%s/0" % (config.log_dir)
 
     # Log some things

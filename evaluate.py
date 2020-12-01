@@ -59,6 +59,7 @@ def evaluate(train_ds, test_ds, writer, log_dir_run):
     #
     conflicts_int = None
     start = config.epochs-5 if config.last_epoch_only else 0   # Take last n as we measure the ema
+    
     for epoch in range(start, config.epochs, 1):
         print("\nEvaluate epoch %d" % epoch, flush=True)
         ckpt_name = "%s/ckpt-%d" % (log_dir_run, epoch)
@@ -77,7 +78,6 @@ def evaluate(train_ds, test_ds, writer, log_dir_run):
             config.num_classes, config.conflicting_samples_size, 
             config.all_conflict_layers)
         conflicts_int = conflicts_integral(conflicts_int, conflicts)
-        print(conflicts)
         print("Num. bundles: %.0f; Bundle entropy: %.5f" % \
                 (conflicts[-1][0], conflicts[-1][1]), flush=True)
 

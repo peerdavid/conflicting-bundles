@@ -21,6 +21,8 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_datasets as tfds
 import tensorflow_addons as tfa
+from tensorflow.keras.mixed_precision import experimental as mixed_precision
+
 
 from models.factory import create_model
 from data.factory import load_dataset
@@ -164,6 +166,11 @@ def main():
     
     train_csv = []
     test_csv = []
+
+    if config.dtype != "float32":
+        policy = mixed_precision.Policy('mixed_%s' % config.dtype)
+        mixed_precision.set_policy(policy)
+
     for r in range(config.runs):
 
         log_dir_run = "%s/%d" % (config.log_dir, r)

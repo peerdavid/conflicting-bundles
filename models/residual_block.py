@@ -1,5 +1,6 @@
 import tensorflow as tf
-
+import random
+import numpy as np
 
 class BasicBlock(tf.keras.layers.Layer):
 
@@ -32,19 +33,31 @@ class BasicBlock(tf.keras.layers.Layer):
             # Here also other bijective functions can be used. We tested with
             # self.downsample = lambda x: 2*x+0.1  
     
-    def call(self, inputs, training):
+    def call(self, inputs, training, use_residual=True):
         x = self.conv1(inputs)
+        scale_bn1 = tf.reduce_mean(x) / tf.math.sqrt(tf.math.reduce_variance(x)+1e-6)
+
         x = self.bn1(x, training=training)
         x = tf.nn.relu(x)
         x = self.conv2(x)
-        x = self.bn2(x, training=training)
-
-        residual = self.downsample(inputs)
-        x = tf.keras.layers.add([residual, x])
         
-        output = tf.nn.relu(x)
-        return output
+        scale_bn2 = 1.0 / tf.math.sqrt(tf.math.reduce_variance(x)+1e-6)
+        self.scale = scale_bn2 * scale_bn1
 
+        x = self.bn2(x, training=training)
+        output_without_residual = tf.nn.relu(x)
+        
+        residual = self.downsample(inputs)
+        if use_residual or training:
+            x = tf.keras.layers.add([residual, x])
+        else:
+            # Kick out layer for lesion experiment
+            x = residual
+
+        output = tf.nn.relu(x)
+
+        self.cb = [output, output_without_residual]
+        return output
 
 def make_basic_block_layer(filter_num, blocks, config, stride=1):
     ret = []

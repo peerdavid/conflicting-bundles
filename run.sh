@@ -16,6 +16,12 @@ source env/bin/activate
 #python3 evaluate.py --dataset="mnist" --log_dir="fnn/25/50"
 
 
+python3 train.py --dataset="mnist" --num_layers="50" --width_layers="25" --dtype="float16" --log_dir="float/float16" --model="fnn" --epochs=10
+python3 train.py --dataset="mnist" --num_layers="50" --width_layers="25" --dtype="float32" --log_dir="float/float32" --model="fnn" --epochs=10
+python3 train.py --dataset="mnist" --num_layers="50" --width_layers="25" --dtype="float64" --log_dir="float/float64" --model="fnn" --epochs=10
+
+
+
 # #
 # # Experiments VGG
 # #
@@ -30,9 +36,9 @@ source env/bin/activate
 # #
 # # Experiments ResNet
 # #
-python3 train.py --dataset="cifar" --num_layers="50" --log_dir="resnet/50" --model="resnet" --epochs=10
-python3 train.py --dataset="cifar" --num_layers="76" --log_dir="resnet/76" --model="resnet" --epochs=10
-python3 train.py --dataset="cifar" --num_layers="100" --log_dir="resnet/100" --model="resnet" --epochs=10
+# python3 train.py --dataset="cifar" --num_layers="50" --log_dir="resnet/50" --model="resnet" --epochs=10
+# python3 train.py --dataset="cifar" --num_layers="76" --log_dir="resnet/76" --model="resnet" --epochs=10
+# python3 train.py --dataset="cifar" --num_layers="100" --log_dir="resnet/100" --model="resnet" --epochs=10
 # # ...
 # python3 evaluate.py --dataset="cifar" --log_dir="resnet/50" 
 # python3 evaluate.py --dataset="cifar" --log_dir="resnet/76" 

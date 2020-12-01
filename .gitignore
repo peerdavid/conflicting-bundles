@@ -3,6 +3,7 @@ experiments/
 *.out
 .vscode
 tmp/
+create_graph.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
