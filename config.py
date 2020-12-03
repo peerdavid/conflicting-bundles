@@ -13,22 +13,23 @@ def get_config():
     argparser = argparse.ArgumentParser(description="Conflicting bundles")
 
     # Training
-    argparser.add_argument("--log_dir", default="tmp",  help="Log directory")   
+    argparser.add_argument("--log_dir", default="resnet/120",  help="Log directory")   
     argparser.add_argument("--dataset", default="imagenette", help="imagenette, cifar, svhn or mnist")
     argparser.add_argument("--runs", default=1, type=int, help="Multiple executions to get mean and std. Ignored for auto-tune in order to get multiple architectures from different executions")
     argparser.add_argument("--epochs", default=120, type=int, help="Number of epochs")
     argparser.add_argument("--batch_size", default=64, type=int, help="Batch size used for training")
     argparser.add_argument("--learning_rate", default=1e-3, type=float, help="Learning rate for optimizer")
+    argparser.add_argument("--dtype", default="float32", help="Floating type to train")
 
     # Model
     argparser.add_argument("--model", default="vgg", help="fnn, vgg or resnet")
-    argparser.add_argument("--num_layers", default=50, type=int, help="Number of layers. Ignored for auto-tune training.")
+    argparser.add_argument("--num_layers", default=120, type=int, help="Number of layers. Ignored for auto-tune training.")
     argparser.add_argument("--width_layers", default=50, type=int, help="Number of neurons per layer for FNN. Ignored for vgg and resnet")
 
     # Evaluation
     argparser.add_argument("--last_epoch_only", default="False", help="Evaluate only last epoch.")
-    argparser.add_argument("--conflicting_samples_size", default=2048, help="How many samples are used for conflict test. Ignored for auto-tune training.")
-    argparser.add_argument("--all_conflict_layers", default="False", help="Evaluate conflicts of each layer. Ignored for auto-tune training.")
+    argparser.add_argument("--conflicting_samples_size", default=64, help="How many samples are used for conflict test. Ignored for auto-tune training.")
+    argparser.add_argument("--all_conflict_layers", default="True", help="Evaluate conflicts of each layer. Ignored for auto-tune training.")
 
     # Update params
     config = argparser.parse_args()
@@ -44,6 +45,9 @@ def get_config():
     if file_config != None:
         file_config.all_conflict_layers = _str_to_bool(config.all_conflict_layers)
         file_config.num_gpus = len(tf.config.experimental.list_physical_devices('GPU'))
+        file_config.runs = config.runs
+        file_config.conflicting_samples_size = config.conflicting_samples_size
+        file_config.last_epoch_only = _str_to_bool(config.last_epoch_only)
         return file_config
 
     config.use_residual = (config.model == "resnet")

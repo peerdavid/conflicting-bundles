@@ -4,16 +4,16 @@ from models.vggnet import VGGNet
 from models.fnn import FNN
 from models.vgg_block import make_basic_block_layer as make_vgg_block
 from models.residual_block import make_basic_block_layer as make_residual_block
+import random
 
-
-def create_model(config):
+def create_model(config, lesion=None):
     # Create from fixed architecture
     if config.model == "vgg":
         blocks = get_blocks(config)
         return VGGNet(blocks, config, block_fn=make_vgg_block)
     elif config.model == "resnet":
         blocks = get_blocks(config)
-        return VGGNet(blocks, config, block_fn=make_residual_block)
+        return VGGNet(blocks, config, block_fn=make_residual_block, lesion=lesion)
     elif config.model == "fnn":
         return FNN(config)
 
