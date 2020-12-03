@@ -36,9 +36,8 @@ def bundle_entropy(model, train_ds, train_batch_size, train_lr,
         
         returns: [[num_bundles_1, bundle_entropy_1], ... [num_bundles_L, bundle_entropy_L]]
     """
-
     train_batch_size = float(train_batch_size)
-    layer_eval = 0 if all_layers else -2
+    layer_eval = 0 if all_layers else -1
     A, Y = [], []
 
     # Execute in eager mode to get access to model.cb
@@ -48,9 +47,15 @@ def bundle_entropy(model, train_ds, train_batch_size, train_lr,
     for x, y in train_ds:
         if len(Y) * train_batch_size >= evaluation_size:
                 continue
-
+        
         inference(x)
-        cb = model.cb[layer_eval:-1]
+
+        if not hasattr(model, 'cb'):
+            print("(Warning) The provided model has no cb attribute set.")
+            print("Please set a^(l) values in the array cb to measure the bundle entropy.")
+            return None
+            
+        cb = model.cb[layer_eval:]
         layers = [c[1] for c in cb]
         A.append([c[0] for c in cb])
         Y.append(y)
@@ -63,7 +68,6 @@ def bundle_entropy(model, train_ds, train_batch_size, train_lr,
     # is O(L * |X|)
     res = []
     A = zip(*A)
-    A = tqdm(A) if all_layers else A
     for i, a in enumerate(A):
         a = tf.cast(tf.concat(a, axis=0), tf.float32)
         a = tf.concat(a, axis=0)
@@ -76,15 +80,11 @@ def bundle_entropy(model, train_ds, train_batch_size, train_lr,
         # larger than the floating point resolution.
         weights_amplitude = _get_weight_amplitude(layers[i])
 
-        # If layers use a scale e.g. to include BN etc. we also have to 
-        # sacle the a values accordingly
-        scale = layers[i].scale if hasattr(layers[i], "scale") else 1.0
-
-        equality_check = weights_amplitude - a * train_lr * (1.0 / train_batch_size) * scale
+        equality_check = weights_amplitude - a * train_lr * (1.0 / train_batch_size)
         equality_check = tf.reshape(equality_check, [tf.shape(equality_check)[0], -1])
         num_bundle, bundle_entropy = _calculate_bundles(equality_check, Y, num_classes)
         res.append([num_bundle, bundle_entropy])
-        #print("%d, %d, %d, %.5f" % (int(i/2), i%2, num_bundle, bundle_entropy), flush=True)
+        print("%d, %d, %d, %.5f" % (int(i/2), i%2, num_bundle, bundle_entropy), flush=True)
 
     return res
 
@@ -99,6 +99,9 @@ def _get_weight_amplitude(layer):
         param: layer - Layer for which the amplitude should be known
         return: Single floating point value of the max. weight amplitude of some sub layers
     """
+    if not hasattr(layer, 'trainable_weights') or len(layer.trainable_weights) <= 0:
+        return 0.0
+
     ret = []
     for weights in layer.trainable_weights:
         ret.append(tf.reduce_max(tf.abs(weights)))

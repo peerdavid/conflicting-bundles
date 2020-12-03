@@ -13,8 +13,8 @@ def get_config():
     argparser = argparse.ArgumentParser(description="Conflicting bundles")
 
     # Training
-    argparser.add_argument("--log_dir", default="tmp",  help="Log directory")   
-    argparser.add_argument("--dataset", default="cifar", help="imagenette, cifar, svhn or mnist")
+    argparser.add_argument("--log_dir", default="resnet/120",  help="Log directory")   
+    argparser.add_argument("--dataset", default="imagenette", help="imagenette, cifar, svhn or mnist")
     argparser.add_argument("--runs", default=1, type=int, help="Multiple executions to get mean and std. Ignored for auto-tune in order to get multiple architectures from different executions")
     argparser.add_argument("--epochs", default=120, type=int, help="Number of epochs")
     argparser.add_argument("--batch_size", default=64, type=int, help="Batch size used for training")
@@ -27,9 +27,9 @@ def get_config():
     argparser.add_argument("--width_layers", default=50, type=int, help="Number of neurons per layer for FNN. Ignored for vgg and resnet")
 
     # Evaluation
-    argparser.add_argument("--last_epoch_only", default="True", help="Evaluate only last epoch.")
-    argparser.add_argument("--conflicting_samples_size", default=256, help="How many samples are used for conflict test. Ignored for auto-tune training.")
-    argparser.add_argument("--all_conflict_layers", default="False", help="Evaluate conflicts of each layer. Ignored for auto-tune training.")
+    argparser.add_argument("--last_epoch_only", default="False", help="Evaluate only last epoch.")
+    argparser.add_argument("--conflicting_samples_size", default=64, help="How many samples are used for conflict test. Ignored for auto-tune training.")
+    argparser.add_argument("--all_conflict_layers", default="True", help="Evaluate conflicts of each layer. Ignored for auto-tune training.")
 
     # Update params
     config = argparser.parse_args()

@@ -115,7 +115,7 @@ def main():
     # Study conflicts
     train_ds, test_ds = load_dataset(config, augment=False)
     conflicts = run_conflicts(train_ds, log_dir_run)
-    
+
     with open("%s/conflicting_layers.csv" % (config.log_dir), "a") as out:
         writer = csv.writer(out)
         row = []
@@ -133,17 +133,17 @@ def main():
             conflicting_layers.append(i)
 
     # Lesion study using the information of conflicts
-    print("\n####################", flush=True)
-    print("Lesion with single layers", flush=True)
-    for drop_layer in range(-1, 59):       
-        # Evaluate conflicts with given lesion
-        train_ds, test_ds = load_dataset(config, augment=False)
-        acc = run_lesion(test_ds, log_dir_run, [drop_layer])
+    # print("\n####################", flush=True)
+    # print("Lesion with single layers", flush=True)
+    # for drop_layer in range(-1, 59):       
+    #     # Evaluate conflicts with given lesion
+    #     train_ds, test_ds = load_dataset(config, augment=False)
+    #     acc = run_lesion(test_ds, log_dir_run, [drop_layer])
         
-        print("Drop layer %.d | Accuracy %.3f" % (drop_layer, acc), flush=True)
-        with open("%s/lesion_layerwise.csv" % (config.log_dir), "a") as out:
-            writer = csv.writer(out)
-            writer.writerow([drop_layer, acc])
+    #     print("Drop layer %.d | Accuracy %.3f" % (drop_layer, acc), flush=True)
+    #     with open("%s/lesion_layerwise.csv" % (config.log_dir), "a") as out:
+    #         writer = csv.writer(out)
+    #         writer.writerow([drop_layer, acc])
     
     # Lesion study from 1 up to 15 drops using only conflicting layers
     print("\n####################", flush=True)
