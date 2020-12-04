@@ -21,7 +21,7 @@ class BasicBlock(tf.keras.layers.Layer):
         self.bn2 = tf.keras.layers.BatchNormalization()
 
 
-    def call(self, inputs, training, use_residual=True):
+    def call(self, inputs, training, use_residual=False):
         x = self.conv1(inputs)
         x = self.bn1(x, training=training)
         x = tf.nn.relu(x)

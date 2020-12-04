@@ -54,3 +54,5 @@ python3 train.py --dataset="mnist" --num_layers="50" --width_layers="25" --dtype
 # python3 evaluate.py --dataset="cifar" --log_dir="auto_tune/0"
 # python3 evaluate.py --dataset="cifar" --log_dir="auto_tune/1"
 # python3 evaluate.py --dataset="cifar" --log_dir="auto_tune/2"
+
+python3 auto_tune.py --dataset="imagenette" --log_dir="auto_tune/0" --epochs=120

@@ -70,7 +70,5 @@ class VGGNet(tf.keras.Model):
         
         x = self.pool2(x)
         x = tf.reshape(x, [tf.shape(x)[0], -1])
-        self.cb.append((x, self.pool2))
-
         x = self.fc(x)
         return x
