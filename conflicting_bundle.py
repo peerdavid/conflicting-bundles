@@ -78,7 +78,7 @@ def bundle_entropy(model, train_ds, train_batch_size, train_lr,
         # check after subtracting the values from the maximum weights which 
         # is equivalent. Note that this is not possible if gamma should be 
         # larger than the floating point resolution.
-        weights_amplitude = _get_weight_amplitude(layers[i])
+        weights_amplitude = _get_weight_amplitude(model)
 
         equality_check = weights_amplitude - a * train_lr * (1.0 / train_batch_size)
         equality_check = tf.reshape(equality_check, [tf.shape(equality_check)[0], -1])
