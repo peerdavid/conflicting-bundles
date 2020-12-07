@@ -37,7 +37,7 @@ class FNN(tf.keras.Model):
         # FC hidden layer
         for l in range(len(self.fc_layers)):
             x = self.fc_layers[l](x)
-            self.cb.append(x)
+            self.cb.append((x, l))
 
         # Output layer
         x = self.out(x)
