@@ -1,13 +1,12 @@
 # Conflicting bundles
 This is the original implementation of the conflicting bundles [paper](https://arxiv.org/abs/2011.02956).
 
-    @misc{peer2020conflicting,
-          title={Conflicting Bundles: Adapting Architectures Towards the Improved Training of Deep Neural Networks}, 
-          author={David Peer and Sebastian Stabinger and Antonio Rodriguez-Sanchez},
-          year={2020},
-          eprint={2011.02956},
-          archivePrefix={arXiv},
-          primaryClass={cs.LG}
+    @inproceedings{peer2021conflicting,
+      title={Conflicting Bundles: Adapting Architectures Towards the Improved Training of Deep Neural Networks},
+      author={Peer, David and Stabinger, Sebastian and Rodriguez-Sanchez, Antonio},
+      booktitle={Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision},
+      pages={256--265},
+      year={2021}
     }
 
 # Dependencies
