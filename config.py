@@ -13,12 +13,12 @@ def get_config():
     argparser = argparse.ArgumentParser(description="Conflicting bundles")
 
     # Training
-    argparser.add_argument("--log_dir", default="resnet/120",  help="Log directory")   
+    argparser.add_argument("--log_dir", default="resnet/120",  help="Log directory")
     argparser.add_argument("--dataset", default="cifar", help="imagenette, cifar, svhn or mnist")
     argparser.add_argument("--runs", default=1, type=int, help="Multiple executions to get mean and std. Ignored for auto-tune in order to get multiple architectures from different executions")
     argparser.add_argument("--epochs", default=120, type=int, help="Number of epochs")
     argparser.add_argument("--batch_size", default=64, type=int, help="Batch size used for training")
-    argparser.add_argument("--learning_rate", default=1e-3, type=float, help="Learning rate for optimizer")
+    argparser.add_argument("--learning_rate", default=5e-4, type=float, help="Learning rate for optimizer")
     argparser.add_argument("--dtype", default="float32", help="Floating type to train")
 
     # Model
@@ -38,7 +38,7 @@ def get_config():
     log_dir = "experiments/%s/%s" % (config.dataset, config.log_dir)
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
-    
+
     # Load config from previous run or parse cmd args
     config.file = "%s/config.pkl" % log_dir
     file_config = _load_config_from_file(config)
@@ -63,7 +63,7 @@ def get_config():
 
 
 def save_config(config):
-    with open(config.file, "wb") as conf_file: 
+    with open(config.file, "wb") as conf_file:
         pickle.dump(config, conf_file, pickle.HIGHEST_PROTOCOL)
 
 

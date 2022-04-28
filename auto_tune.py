@@ -1,10 +1,10 @@
 #
-# Automatically create the architecture and train the network. Can then be 
-# evaluated using "evaluate.py". 
+# Automatically create the architecture and train the network. Can then be
+# evaluated using "evaluate.py".
 #
 
 try:
-    # If we are running in a multi node multi gpu setup. Otherwise run 
+    # If we are running in a multi node multi gpu setup. Otherwise run
     # with tensorflow defaults
     import cluster_setup
 except ImportError:
@@ -30,21 +30,22 @@ config = get_config()
 
 # Only one run as we want to see how auto-tune creates different architectures.
 # Therefore auto_tune should be called multiple times with different log dirs
-config.runs = 1 
+config.runs = 1
 
-def prune_model(model, train_ds):       
-    """ If the bundle entropy is larger than zero, the first conflicting layer 
-        and all subsequent layers of the same block type (a, b, c or d) are 
+def prune_model(model, train_ds):
+    """ If the bundle entropy is larger than zero, the first conflicting layer
+        and all subsequent layers of the same block type (a, b, c or d) are
         removed from the architecture.
     """
     print("Start pruning of architecture...", flush=True)
     conflicts = cb.bundle_entropy(
-            model, train_ds, 
+            model, train_ds,
             config.batch_size, config.learning_rate,
-            config.num_classes, config.conflicting_samples_size, 
+            config.num_classes, config.conflicting_samples_size,
             all_layers=True)
-    
+
     layer = -1
+    pruned = False
     for block_type in range(len(config.pruned_layers)):
         new_layers = 0
         for block_layer in range(config.pruned_layers[block_type]):
@@ -53,15 +54,18 @@ def prune_model(model, train_ds):
 
             if bundle_entropy_of_layer <= 0:
                 new_layers += 1
-                #continue
-            
+            else:
+                pruned = True
+
         config.pruned_layers[block_type] = new_layers
-    save_config(config)
-            #return
-            
+
+        if pruned:
+            save_config(config)
+            return
+
 
 def train(train_ds, test_ds, train_writer, test_writer, log_dir_run):
-    
+
     # Initialize
     strategy = tf.distribute.MirroredStrategy()
     num_replicas = strategy.num_replicas_in_sync
@@ -69,11 +73,11 @@ def train(train_ds, test_ds, train_writer, test_writer, log_dir_run):
     with strategy.scope():
         model = create_model(config)
         radam=tfa.optimizers.RectifiedAdam(
-            learning_rate=config.learning_rate, 
+            learning_rate=config.learning_rate,
             epsilon=1e-6, weight_decay=1e-2
         )
         optimizer = tfa.optimizers.Lookahead(radam)
-    
+
     train_ds = strategy.experimental_distribute_dataset(train_ds)
     test_ds = strategy.experimental_distribute_dataset(test_ds)
 
@@ -85,7 +89,7 @@ def train(train_ds, test_ds, train_writer, test_writer, log_dir_run):
         def compute_loss(y, pred):
             per_example_loss = loss_fun(y, pred)
             loss = tf.nn.compute_average_loss(
-                per_example_loss, 
+                per_example_loss,
                 global_batch_size=config.batch_size)
             return loss
 
@@ -99,11 +103,11 @@ def train(train_ds, test_ds, train_writer, test_writer, log_dir_run):
     def reset_train_metrics():
         train_accuracy.reset_states()
         train_loss.reset_states()
-        
+
     def reset_test_metrics():
         test_accuracy.reset_states()
         test_loss.reset_states()
-        
+
     reset_train_metrics()
     reset_test_metrics()
 
@@ -127,16 +131,16 @@ def train(train_ds, test_ds, train_writer, test_writer, log_dir_run):
 
             test_accuracy.update_state(y, pred)
             test_loss.update_state(loss)
-            
+
 
     with strategy.scope():
         @tf.function
         def distributed_train_step(x, y):
-            strategy.experimental_run_v2(train_step, args=(x, y,))
-        
+            strategy.run(train_step, args=(x, y,))
+
         @tf.function
         def distributed_test_step(x, y):
-            strategy.experimental_run_v2(test_step, args=(x, y,))
+            strategy.run(test_step, args=(x, y,))
 
         #
         # TRAINING LOOP
@@ -158,26 +162,26 @@ def train(train_ds, test_ds, train_writer, test_writer, log_dir_run):
                     start = time.time()
                     distributed_test_step(x, y)
 
-                with test_writer.as_default(): 
-                    log_tensorboard("TEST", start, test_accuracy, 
+                with test_writer.as_default():
+                    log_tensorboard("TEST", start, test_accuracy,
                         epoch, test_loss, model, x)
-                    reset_test_metrics()   
+                    reset_test_metrics()
 
-            # In the previous experiments we have seen that 
-            # conflicts occur after the third epoch. If we already 
-            # trained the network for 10 epochs without any conflicts, 
-            # we continue without checking conflicts because we have seen 
+            # In the previous experiments we have seen that
+            # conflicts occur after the third epoch. If we already
+            # trained the network for 10 epochs without any conflicts,
+            # we continue without checking conflicts because we have seen
             # in the experiments that after 10 epoch conflicts rarly occur.
             if epoch < 10:
-                # We evaluate the conflicting layer only if we have 
-                # conflicts at a^{(L)} as its computationally cheaper to 
+                # We evaluate the conflicting layer only if we have
+                # conflicts at a^{(L)} as its computationally cheaper to
                 # evaluate only the last layer rather than all layers
                 config.all_conflict_layers = False
                 print("Checking conflicts...")
                 conflicts = cb.bundle_entropy(
-                    model, train_ds, 
+                    model, train_ds,
                     config.batch_size, config.learning_rate,
-                    config.num_classes, config.conflicting_samples_size, 
+                    config.num_classes, config.conflicting_samples_size,
                     all_layers=False)
                 print("Entropy: %.5f" % conflicts[-1][1])
 
@@ -196,19 +200,19 @@ def train(train_ds, test_ds, train_writer, test_writer, log_dir_run):
                     start = time.time()
                     distributed_train_step(x, y)
 
-                with train_writer.as_default(): 
+                with train_writer.as_default():
                     log_tensorboard("TRAIN", start, train_accuracy, epoch,
                         train_loss, model, x)
                     reset_train_metrics()
-                train_writer.flush()  
-            
+                train_writer.flush()
+
             epoch += 1
 
         return True
 
-    
+
 def log_tensorboard(name, start, accuracy, epoch, loss, model, x):
-        
+
     accuracy_val = accuracy.result().numpy()
     loss_val = loss.result().numpy()
 
@@ -233,28 +237,28 @@ def main():
     print("\n\n####################", flush=True)
     print("# AUTO TUNE %s" % config.log_dir, flush=True)
     print("####################\n", flush=True)
-    
+
     train_csv = []
     test_csv = []
 
-    # "First, the largest network from fig. 1 (120 layer) is trained without 
+    # "First, the largest network from fig. 1 (120 layer) is trained without
     # residual connections."
     config.model = "vgg"
     config.pruned_layers = [3,12,41,3]
     config.use_residual = False
-    config.conflicting_samples_size = 64 
+    config.conflicting_samples_size = 64
     log_dir_run = "%s/0" % (config.log_dir)
 
     # Log some things
     if not os.path.exists(config.log_dir):
         os.makedirs(config.log_dir)
-    
+
     train_writer = tf.summary.create_file_writer("%s/train" % log_dir_run)
     test_writer = tf.summary.create_file_writer("%s/test" % log_dir_run)
 
     # Load dataset
     train_ds, test_ds = load_dataset(config, augment=True)
-    
+
     # "[...] This process is repeated until no conflicting layer can be found and the
     # network is successfully trained without conflicting bundles for 120 epochs."
     trained = False
@@ -263,7 +267,7 @@ def main():
         print("# Train model with blocks %s" % config.pruned_layers)
         print("###################################################")
 
-        # Write hyperparameters, therefore in TensorBoard all 
+        # Write hyperparameters, therefore in TensorBoard all
         # network updates are logged.
         with train_writer.as_default():
             params = vars(config)
@@ -275,7 +279,7 @@ def main():
         train_writer.flush()
 
         # Try to train the model
-        trained = train(train_ds, test_ds, train_writer, test_writer, log_dir_run)       
+        trained = train(train_ds, test_ds, train_writer, test_writer, log_dir_run)
 
 
 if __name__ == '__main__':
