@@ -150,7 +150,7 @@ def _calculate_single_bundle(i, bundle, X, Y, bundle_entropy, num_classes):
     equal_components = tf.cast(tf.equal(x, X), tf.float32)
     # Majority of the components must be equivalent, therefore check (using the sum and dim_X) whether this is the case
     num_equal_components = tf.reduce_sum(equal_components, axis=-1)
-    same_bundle = tf.cast(tf.greater_equal(num_equal_components, 0.7*dim_X), tf.float32)
+    same_bundle = tf.cast(tf.greater_equal(num_equal_components, 0.6*dim_X), tf.float32)
     # And bundle all components
     bundle += same_bundle * next_bundle_id * zero_out
 
