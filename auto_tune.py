@@ -167,6 +167,20 @@ def train(train_ds, test_ds, train_writer, test_writer, log_dir_run):
                         epoch, test_loss, model, x)
                     reset_test_metrics()
 
+            #
+            # Train
+            #
+            if not is_last_epoch:
+                for x, y in train_ds:
+                    start = time.time()
+                    distributed_train_step(x, y)
+
+                with train_writer.as_default():
+                    log_tensorboard("TRAIN", start, train_accuracy, epoch,
+                        train_loss, model, x)
+                    reset_train_metrics()
+                train_writer.flush()
+
             # In the previous experiments we have seen that
             # conflicts occur after the third epoch. If we already
             # trained the network for 10 epochs without any conflicts,
@@ -191,20 +205,6 @@ def train(train_ds, test_ds, train_writer, test_writer, log_dir_run):
                     print("Found conflicting layers.", flush=True)
                     prune_model(model, train_ds)
                     return False
-
-            #
-            # Train
-            #
-            if not is_last_epoch:
-                for x, y in train_ds:
-                    start = time.time()
-                    distributed_train_step(x, y)
-
-                with train_writer.as_default():
-                    log_tensorboard("TRAIN", start, train_accuracy, epoch,
-                        train_loss, model, x)
-                    reset_train_metrics()
-                train_writer.flush()
 
             epoch += 1
 
